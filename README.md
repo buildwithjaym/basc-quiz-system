@@ -33,7 +33,20 @@ Includes a **live-updating leaderboard**, score distribution chart, and **CSV ex
 
 ---
 
+
 ## Screenshots
+
+### Home / Start
+![Home](assets/screenshots/home.png)
+
+### Quiz_Time
+![Quiz](assets/screenshots/image.png)
+
+### Leaderboard
+![Leaderboard](assets/screenshots/leaderboard.png)
+
+### Ranking
+![Ranking](assets/screenshots/Rankinggg.png)
 
 
 ## Getting Started (XAMPP)
