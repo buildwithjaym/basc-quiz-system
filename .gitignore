@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Env / secrets
+.env
+
+# Vendor (if you later add Composer)
+vendor/
+
+# Uploads / runtime
+uploads/
+tmp/
+cache/
