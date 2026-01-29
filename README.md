@@ -43,7 +43,7 @@ Includes a **live-updating leaderboard**, score distribution chart, and **CSV ex
 ![Quiz](assets/screenshots/image.png)
 
 ### Leaderboard
-![Leaderboard](assets/screenshots/leaderboard.png)
+![Leaderboard](assets/screenshots/Leaderboard.png)
 
 ### Ranking
 ![Ranking](assets/screenshots/Rankinggg.png)
