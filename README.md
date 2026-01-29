@@ -54,4 +54,4 @@ Includes a **live-updating leaderboard**, score distribution chart, and **CSV ex
 ### 1) Clone / Download
 
 ```bash
-git clone https://github.com/buildwithjaym>/basc-quiz-system.git
+git clone https://github.com/buildwithjaym/basc-quiz-system.git
