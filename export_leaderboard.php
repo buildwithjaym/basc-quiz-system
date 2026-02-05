@@ -28,7 +28,7 @@ echo "\xEF\xBB\xBF";
 
 $out = fopen('php://output', 'w');
 
-fputcsv($out, ['Rank', 'Name', 'Total (30)', 'Percent','Questions (20)', 'Identification (10)', 'Time (seconds)', 'Submitted At']);
+fputcsv($out, ['Rank', 'Name', 'Total (15)', 'Percent %','Questions (15)', 'Time (seconds)', 'Submitted At']);
 
 $rank = 0;
 foreach ($rows as $r) {
@@ -39,9 +39,8 @@ foreach ($rows as $r) {
     $rank,
     $name,
     (int)$r['total_score'],
-    (int)$r['percent'],
+    (int)$r['percent']. '%',
     (int)$r['score_mcq'],
-    (int)$r['score_ident'],
     (int)$r['time_seconds'],
     $r['created_at'],
   ]);
