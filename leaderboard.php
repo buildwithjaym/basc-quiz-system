@@ -171,7 +171,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
     </footer>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="assets/js/chart.js"></script>
   <script>
     const MAX_SCORE = <?= (int)$MAX_SCORE ?>;
     const labels = [...Array(MAX_SCORE + 1).keys()].map(String);
