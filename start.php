@@ -58,8 +58,7 @@ require __DIR__ . '/partials/header.php';
     <div class="panel">
       <h3 class="h3">Rules</h3>
       <ul class="rules">
-        <li>20 Multiple Choice (A/B/C/D)</li>
-        <li>10 Identification (type the tool/logo name)</li>
+        <li>15 Multiple Choice (A/B/C/D)</li>
         <li>You may navigate questions before submitting</li>
         <li>Once submitted, answers are locked</li>
         <li>Time limit: <strong><?= (int)(MAX_TIME_SECONDS/60) ?> minutes</strong></li>

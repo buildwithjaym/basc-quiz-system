@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <section class="card hero">
   <div>
     <h1 class="h1">Report 1 Quiz</h1>
-    <p class="lead">20 Multiple Questions + 10 logo/tool identification. One attempt only.</p>
+    <p class="lead">15 Multiple Questions about the Ethics and Morality One attempt only.</p>
 
     <?php if ($errors): ?>
       <div class="alert">
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           Continue →
           <span class="btn__shine"></span>
         </button>
-        <a class="btn btn--ghost" href="leaderboard.php">Leaderboard</a>
+        
       </div>
     </form>
 
