@@ -1,4 +1,5 @@
 <?php
+// submit.php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/question_bank.php';
@@ -39,10 +40,12 @@ foreach ($bank["mcq"] as $q) $mcq_map[$q["key"]] = $q["answer"];
 $ident_map = [];
 foreach ($bank["ident"] as $q) $ident_map[$q["key"]] = $q["answer"];
 
+$MAX_SCORE = count($bank["mcq"]) + count($bank["ident"]);
+
 function norm($s) {
   $s = mb_strtolower(trim((string)$s));
   $s = preg_replace('/[\s\-_]+/u', '', $s);
-  return $s;
+  return (string)$s;
 }
 
 $score_mcq = 0;
@@ -89,14 +92,22 @@ try {
   }
 
   $total = $score_mcq + $score_ident;
+
+  $percent = 0;
+  if ($MAX_SCORE > 0) {
+    $percent = (int)round(($total / $MAX_SCORE) * 100);
+    if ($percent < 0) $percent = 0;
+    if ($percent > 100) $percent = 100;
+  }
+
   $compliment = random_compliment();
 
   $upd = $conn->prepare("
     UPDATE attempts
-    SET score_mcq=?, score_ident=?, total_score=?, time_seconds=?, submitted=1, compliment=?
+    SET score_mcq=?, score_ident=?, total_score=?, percent=?, time_seconds=?, submitted=1, compliment=?
     WHERE id=? AND student_id=?
   ");
-  $upd->bind_param("iiiisii", $score_mcq, $score_ident, $total, $time_seconds, $compliment, $attempt_id, $student_id);
+  $upd->bind_param("iiiiisii", $score_mcq, $score_ident, $total, $percent, $time_seconds, $compliment, $attempt_id, $student_id);
   $upd->execute();
 
   if ($upd->affected_rows < 1) {
@@ -108,9 +119,10 @@ try {
   echo json_encode([
     "ok" => true,
     "total_score" => $total,
+    "percent" => $percent,
     "compliment" => $compliment
   ], JSON_UNESCAPED_UNICODE);
-} catch (Exception $e) {
+} catch (Throwable $e) {
   $conn->rollback();
   json_fail(500, "Server error: " . $e->getMessage());
 }
