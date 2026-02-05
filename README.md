@@ -51,7 +51,7 @@ Includes a **live-updating leaderboard**, score distribution chart, and **CSV ex
 
 ## Getting Started (XAMPP)
 
-### 1) Clone / Download
+### 1 Clone / Download
 
 ```bash
 git clone https://github.com/buildwithjaym/basc-quiz-system.git

@@ -40,7 +40,7 @@ require __DIR__ . '/partials/header.php';
     </div>
     <div class="scorebadge pop">
       <div class="scorebadge__big"><?= (int)$attempt['total_score'] ?></div>
-      <div class="scorebadge__small">/ 30</div>
+      <div class="scorebadge__small">/ 15</div>
     </div>
   </div>
 
@@ -56,8 +56,7 @@ require __DIR__ . '/partials/header.php';
     <div class="panel">
       <h3 class="h3">Breakdown</h3>
       <ul class="kv">
-        <li><span>MCQ</span><span><strong><?= (int)$attempt['score_mcq'] ?></strong>/20</span></li>
-        <li><span>Identification</span><span><strong><?= (int)$attempt['score_ident'] ?></strong>/10</span></li>
+        <li><span>MCQ</span><span><strong><?= (int)$attempt['score_mcq'] ?></strong>/15</span></li>
         <li><span>Time</span><span><strong><?= (int)$attempt['time_seconds'] ?></strong> sec</span></li>
       </ul>
       <a class="btn btn--ghost" href="leaderboard.php">Leaderboard</a>
@@ -75,17 +74,17 @@ require __DIR__ . '/partials/header.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   const mcq = <?= (int)$attempt['score_mcq'] ?>;
-  const ident = <?= (int)$attempt['score_ident'] ?>;
+  
 
   new Chart(document.getElementById('chartA'), {
     type: 'doughnut',
-    data: { labels: [' MCQ: ', 'Identification: '], datasets: [{ data: [mcq, ident] }] },
+    data: { labels: [' MCQ: '], datasets: [{ data: [mcq] }] },
     options: { plugins: { legend: { position: 'bottom' } } }
   });
 
   new Chart(document.getElementById('chartB'), {
     type: 'bar',
-    data: { labels: [' MCQ: ', ' Identification'], datasets: [{ label: ' Score', data: [mcq, ident] }] },
+    data: { labels: [' MCQ: '], datasets: [{ label: ' Score', data: [mcq] }] },
     options: {
       plugins: { legend: { position: 'bottom' } },
       scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }

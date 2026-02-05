@@ -25,7 +25,7 @@ if (!function_exists('h')) {
     <img class="brand__logo" src="assets/img/basc-logo.jpg" alt="BASC Logo" />
     <div class="brand__text">
       <div class="brand__title"><?= h(APP_NAME) ?></div>
-      <div class="brand__subtitle">Exam Mode • Software Engineering</div>
+      <div class="brand__subtitle">Quiz Mode • Ethics and Morality</div>
     </div>
   </div>
 
