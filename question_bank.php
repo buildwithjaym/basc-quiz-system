@@ -1,243 +1,175 @@
 <?php
+// question_bank.php
 
 function get_question_bank() {
 
   $mcq = [
     [
       "key" => "mcq_01",
-      "prompt" => "What is software engineering mainly about?",
+      "prompt" => "The term ethics is derived from the Greek word ____.",
       "choices" => [
-        "A" => "Making hardware",
-        "B" => "Designing, building, and maintaining software",
-        "C" => "Selling computers",
-        "D" => "Using the internet"
+        "A" => "mos",
+        "B" => "ethos",
+        "C" => "moris",
+        "D" => "moralitas"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_02",
-      "prompt" => "Why is software considered intangible?",
+      "prompt" => "Ethos originally means ____.",
       "choices" => [
-        "A" => "You can touch it",
-        "B" => "It has weight",
-        "C" => "It cannot be physically touched",
-        "D" => "It is made of metal"
+        "A" => "law and punishment",
+        "B" => "custom or character",
+        "C" => "religion",
+        "D" => "government rule"
       ],
-      "answer" => "C"
+      "answer" => "B"
     ],
     [
       "key" => "mcq_03",
-      "prompt" => "Why can software systems be very complex?",
+      "prompt" => "Ethics is a branch of philosophy that studies the ____ of human action.",
       "choices" => [
-        "A" => "They are heavy",
-        "B" => "They have infinite possible complexity",
-        "C" => "They never change",
-        "D" => "They are cheap"
+        "A" => "speed",
+        "B" => "rightness or wrongness",
+        "C" => "popularity",
+        "D" => "profit"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_04",
-      "prompt" => "Do all software types use the same engineering techniques?",
+      "prompt" => "Morality refers to the set of standards that enable people to live ____ in groups.",
       "choices" => [
-        "A" => "Yes",
-        "B" => "No",
-        "C" => "Only games do",
-        "D" => "Only websites do"
+        "A" => "competitively",
+        "B" => "cooperatively",
+        "C" => "secretly",
+        "D" => "alone"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_05",
-      "prompt" => "What increases the demand for software engineering?",
+      "prompt" => "Morality comes from the Greek/Latin roots meaning ____.",
       "choices" => [
-        "A" => "Smaller systems",
-        "B" => "Slower computers",
-        "C" => "Bigger and more complex systems",
-        "D" => "Fewer users"
+        "A" => "manner or characteristics",
+        "B" => "truth and science",
+        "C" => "money and trade",
+        "D" => "plants and animals"
       ],
-      "answer" => "C"
+      "answer" => "A"
     ],
     [
       "key" => "mcq_06",
-      "prompt" => "What can cause software projects to fail?",
+      "prompt" => "Which area of ethics deals with the nature of moral judgement and the meaning of ethical principles?",
       "choices" => [
-        "A" => "High expectations",
-        "B" => "Poor engineering methods",
-        "C" => "Too many users",
-        "D" => "Too much money"
-      ],
-      "answer" => "B"
-    ],
-    [
-      "key" => "mcq_07",
-      "prompt" => "Professional software is usually developed for:",
-      "choices" => [
-        "A" => "Personal use only",
-        "B" => "Entertainment only",
-        "C" => "Businesses or organizations",
-        "D" => "Games only"
+        "A" => "Applied Ethics",
+        "B" => "Normative Ethics",
+        "C" => "Metaethics",
+        "D" => "Scientific Ethics"
       ],
       "answer" => "C"
     ],
     [
-      "key" => "mcq_08",
-      "prompt" => "Software includes more than programs. It also includes:",
+      "key" => "mcq_07",
+      "prompt" => "Normative ethics is concerned with ____.",
       "choices" => [
-        "A" => "Hardware",
-        "B" => "Documentation",
-        "C" => "Monitors",
-        "D" => "Printers"
+        "A" => "the criteria for what is right or wrong",
+        "B" => "computer programming rules",
+        "C" => "weather patterns",
+        "D" => "historical dates"
+      ],
+      "answer" => "A"
+    ],
+    [
+      "key" => "mcq_08",
+      "prompt" => "Applied ethics deals with ____.",
+      "choices" => [
+        "A" => "dream interpretation",
+        "B" => "application of moral principles to real-world problems",
+        "C" => "grammar rules",
+        "D" => "math formulas"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_09",
-      "prompt" => "Why is documentation important in professional software?",
+      "prompt" => "Ethics helps people choose good actions and avoid ____ others.",
       "choices" => [
-        "A" => "For decoration",
-        "B" => "To help users and developers understand the system",
-        "C" => "To slow development",
-        "D" => "To replace testing"
+        "A" => "helping",
+        "B" => "harming",
+        "C" => "respecting",
+        "D" => "listening to"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_10",
-      "prompt" => "What tool is mentioned for managing software versions?",
+      "prompt" => "For society, ethics helps keep ____.",
       "choices" => [
-        "A" => "GitHub",
-        "B" => "Calculator",
-        "C" => "Paint",
-        "D" => "Browser"
+        "A" => "peace and order",
+        "B" => "more noise",
+        "C" => "more confusion",
+        "D" => "more fighting"
       ],
       "answer" => "A"
     ],
     [
       "key" => "mcq_11",
-      "prompt" => "Generic software products are:",
+      "prompt" => "Ethics can provide a moral plan by acting like a ____ for living.",
       "choices" => [
-        "A" => "Made for one customer",
-        "B" => "Sold to many customers",
-        "C" => "Never reused",
-        "D" => "Always free"
+        "A" => "roadmap",
+        "B" => "calculator",
+        "C" => "receipt",
+        "D" => "coin"
       ],
-      "answer" => "B"
+      "answer" => "A"
     ],
     [
       "key" => "mcq_12",
-      "prompt" => "Customized software products are:",
+      "prompt" => "Ethics does not always give one final answer because some problems are ____.",
       "choices" => [
-        "A" => "Sold in stores",
-        "B" => "Made for a specific customer",
-        "C" => "Always online",
-        "D" => "Only for games"
+        "A" => "simple",
+        "B" => "complicated",
+        "C" => "funny",
+        "D" => "fake"
       ],
       "answer" => "B"
     ],
     [
       "key" => "mcq_13",
-      "prompt" => "Which is an example of a stand-alone application?",
+      "prompt" => "Ethics is about the “other” because it focuses on how your actions affect ____.",
       "choices" => [
-        "A" => "Word processor",
-        "B" => "Car brake system",
-        "C" => "Payroll batch system",
-        "D" => "Embedded sensor"
+        "A" => "only yourself",
+        "B" => "other people",
+        "C" => "only animals",
+        "D" => "only machines"
       ],
-      "answer" => "A"
+      "answer" => "B"
     ],
     [
       "key" => "mcq_14",
-      "prompt" => "Embedded systems are commonly found in:",
+      "prompt" => "Ethics can be a source of group strength because it builds ____.",
       "choices" => [
-        "A" => "Books",
-        "B" => "Cars and mobile phones",
-        "C" => "Notebooks",
-        "D" => "Websites only"
+        "A" => "trust and unity",
+        "B" => "fear and doubt",
+        "C" => "hate and anger",
+        "D" => "laziness"
       ],
-      "answer" => "B"
+      "answer" => "A"
     ],
     [
       "key" => "mcq_15",
-      "prompt" => "Batch processing systems are used for:",
+      "prompt" => "Moral realism says that right and wrong are ____.",
       "choices" => [
-        "A" => "Games",
-        "B" => "Payroll and billing",
-        "C" => "Web browsing",
-        "D" => "Chatting"
+        "A" => "just jokes",
+        "B" => "real facts, not just opinions",
+        "C" => "always changing every day",
+        "D" => "only based on emotions"
       ],
       "answer" => "B"
-    ],
-    [
-      "key" => "mcq_16",
-      "prompt" => "A managed software process includes:",
-      "choices" => [
-        "A" => "No planning",
-        "B" => "Planning and scheduling",
-        "C" => "Ignoring requirements",
-        "D" => "No deadlines"
-      ],
-      "answer" => "B"
-    ],
-    [
-      "key" => "mcq_17",
-      "prompt" => "Dependability includes which of the following?",
-      "choices" => [
-        "A" => "Design only",
-        "B" => "Reliability and security",
-        "C" => "Marketing",
-        "D" => "Speed only"
-      ],
-      "answer" => "B"
-    ],
-    [
-      "key" => "mcq_18",
-      "prompt" => "What did the web change in software engineering?",
-      "choices" => [
-        "A" => "Software became offline",
-        "B" => "Easier deployment and updates",
-        "C" => "Fewer systems",
-        "D" => "Less integration"
-      ],
-      "answer" => "B"
-    ],
-    [
-      "key" => "mcq_19",
-      "prompt" => "What does SaaS stand for?",
-      "choices" => [
-        "A" => "Software as a Service",
-        "B" => "System as a Software",
-        "C" => "Software and Security",
-        "D" => "Service as a Software"
-      ],
-      "answer" => "A"
-    ],
-    [
-      "key" => "mcq_20",
-      "prompt" => "One ethical responsibility of software engineers is:",
-      "choices" => [
-        "A" => "Confidentiality",
-        "B" => "Hacking",
-        "C" => "Piracy",
-        "D" => "Ignoring laws"
-      ],
-      "answer" => "A"
     ],
   ];
 
-  
-  $ident = [
-    ["key"=>"ident_01","image"=>"assets/img/github.png","answer"=>"github"],
-    ["key"=>"ident_02","image"=>"assets/img/gitlab.png","answer"=>"gitlab"],
-    ["key"=>"ident_03","image"=>"assets/img/supabase.png","answer"=>"supabase"],
-    ["key"=>"ident_04","image"=>"assets/img/mysql.png","answer"=>"mysql"],
-    ["key"=>"ident_05","image"=>"assets/img/postgresql.png","answer"=>"postgresql"],
-    ["key"=>"ident_06","image"=>"assets/img/firebase.png","answer"=>"firebase"],
-    ["key"=>"ident_07","image"=>"assets/img/git.png","answer"=>"git"],
-    ["key"=>"ident_08","image"=>"assets/img/microprocessor.png","answer"=>"microprocessor"],
-    ["key"=>"ident_09","image"=>"assets/img/docker.png","answer"=>"docker"],
-    ["key"=>"ident_10","image"=>"assets/img/vscode.png","answer"=>"vscode"],
-  ];
-
-  return ["mcq" => $mcq, "ident" => $ident];
+  return ["mcq" => $mcq, "ident" => []];
 }
