@@ -9,7 +9,7 @@ $conn = db();
 
 $rows = $conn->query("
   SELECT s.first_name, s.last_name,
-         a.total_score, a.score_mcq, a.score_ident, a.time_seconds, a.created_at
+         a.total_score, a.percent, a.score_mcq, a.score_ident, a.time_seconds, a.created_at
   FROM attempts a
   JOIN students s ON s.id = a.student_id
   WHERE a.submitted = 1
@@ -28,7 +28,7 @@ echo "\xEF\xBB\xBF";
 
 $out = fopen('php://output', 'w');
 
-fputcsv($out, ['Rank', 'Name', 'Total (30)', 'Questions (20)', 'Identification (10)', 'Time (seconds)', 'Submitted At']);
+fputcsv($out, ['Rank', 'Name', 'Total (30)', 'Percent','Questions (20)', 'Identification (10)', 'Time (seconds)', 'Submitted At']);
 
 $rank = 0;
 foreach ($rows as $r) {
@@ -39,6 +39,7 @@ foreach ($rows as $r) {
     $rank,
     $name,
     (int)$r['total_score'],
+    (int)$r['percent'],
     (int)$r['score_mcq'],
     (int)$r['score_ident'],
     (int)$r['time_seconds'],

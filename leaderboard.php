@@ -6,10 +6,10 @@ session_start();
 $conn = db();
 
 if (!function_exists('h')) {
-  function h($str) {
-    return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
-  }
+  function h($str) { return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8'); }
 }
+
+$MAX_SCORE = 15;
 
 $rows = $conn->query("
   SELECT 
@@ -18,9 +18,8 @@ $rows = $conn->query("
     s.last_name,
     COALESCE(a.total_score, 0) AS total_score,
     COALESCE(a.score_mcq, 0) AS score_mcq,
-    COALESCE(a.score_ident, 0) AS score_ident,
     COALESCE(a.time_seconds, 0) AS time_seconds,
-    a.submitted,
+    COALESCE(a.submitted, 0) AS submitted,
     a.created_at
   FROM students s
   LEFT JOIN attempts a ON a.student_id = s.id
@@ -39,18 +38,18 @@ $allScores = $conn->query("
   WHERE submitted = 1
 ")->fetch_all(MYSQLI_ASSOC);
 
-$dist = array_fill(0, 31, 0);
+$dist = array_fill(0, $MAX_SCORE + 1, 0);
 foreach ($allScores as $r) {
   $t = (int)$r['total_score'];
-  if ($t >= 0 && $t <= 30) $dist[$t]++;
+  if ($t >= 0 && $t <= $MAX_SCORE) $dist[$t]++;
 }
 
 function full_name(array $r) {
-  return trim(($r['first_name'] ) . ' ' . ($r['last_name'] ));
+  return trim(($r['first_name']) . ' ' . ($r['last_name']));
 }
 
 $submittedOnly = array_values(array_filter($rows, function($r){
-  return (int)($r['submitted'] ) === 1;
+  return (int)($r['submitted']) === 1;
 }));
 
 $top3 = array_slice($submittedOnly, 0, 3);
@@ -60,7 +59,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BASC Quiz • Leaderboard</title>
+  <title>QUIZORA • Leaderboard</title>
   <link rel="stylesheet" href="assets/css/leaderboard.css">
 </head>
 <body>
@@ -72,7 +71,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
       </div>
 
       <div class="actions">
-        <a class="btn btn-ghost" href="export_leaderboard.php">Export (Excel CSV)</a>
+        <a class="btn btn-ghost" href="export_leaderboard.php">Export CSV</a>
         <a class="btn btn-primary" href="index.php">Home</a>
       </div>
     </header>
@@ -80,14 +79,19 @@ $top3 = array_slice($submittedOnly, 0, 3);
     <section class="podium" id="podium">
       <?php if ($top3): ?>
         <?php for ($k = 0; $k < min(3, count($top3)); $k++): ?>
-          <?php $r = $top3[$k]; ?>
+          <?php
+            $r = $top3[$k];
+            $pct = $MAX_SCORE > 0 ? (int)round(((int)$r['total_score'] / $MAX_SCORE) * 100) : 0;
+          ?>
           <article class="podium-card podium-<?= $k+1 ?>">
             <div class="medal"><?= $k===0 ? "🥇" : ($k===1 ? "🥈" : "🥉") ?></div>
             <div class="pname"><?= h(full_name($r)) ?></div>
             <div class="pmeta">
-              <span class="pscore"><strong><?= (int)$r['total_score'] ?></strong>/30</span>
+              <span class="pscore"><strong><?= (int)$r['total_score'] ?></strong>/<?= $MAX_SCORE ?></span>
               <span class="dot">•</span>
               <span class="ptime"><?= (int)$r['time_seconds'] ?>s</span>
+              <span class="dot">•</span>
+              <span class="ppct"><strong><?= $pct ?>%</strong></span>
             </div>
           </article>
         <?php endfor; ?>
@@ -113,13 +117,14 @@ $top3 = array_slice($submittedOnly, 0, 3);
                 <th class="c-rank">#</th>
                 <th class="c-name">Name</th>
                 <th class="c-total">Total</th>
-                <th class="c-mcq">Questions</th>
-                <th class="c-ident">Identification</th>
+                <th class="c-pct">%</th>
+                <th class="c-mcq">MCQ</th>
                 <th class="c-time">Time</th>
                 <th class="c-date">Submitted</th>
                 <th class="c-status">Status</th>
               </tr>
             </thead>
+
             <tbody id="lbBody">
               <?php if (!$rows): ?>
                 <tr><td class="empty" colspan="8">No students yet.</td></tr>
@@ -131,13 +136,14 @@ $top3 = array_slice($submittedOnly, 0, 3);
                     $submittedText = $r['created_at'] ? date("M d, Y h:i A", strtotime($r['created_at'])) : '';
                     $status = $submitted ? "Submitted" : "Not yet";
                     $rowClass = $submitted ? (($rank <= 5) ? "top5 top5-{$rank}" : "") : "not-submitted";
+                    $pct = $MAX_SCORE > 0 ? (int)round(((int)$r['total_score'] / $MAX_SCORE) * 100) : 0;
                   ?>
                   <tr class="<?= h($rowClass) ?>" data-name="<?= h(strtolower(full_name($r))) ?>">
                     <td class="c-rank"><?= $rank ?></td>
                     <td class="c-name"><?= h(full_name($r)) ?></td>
-                    <td class="c-total"><strong><?= (int)$r['total_score'] ?></strong>/30</td>
-                    <td class="c-mcq"><?= (int)$r['score_mcq'] ?>/20</td>
-                    <td class="c-ident"><?= (int)$r['score_ident'] ?>/10</td>
+                    <td class="c-total"><strong><?= (int)$r['total_score'] ?></strong>/<?= $MAX_SCORE ?></td>
+                    <td class="c-pct"><strong><?= $pct ?>%</strong></td>
+                    <td class="c-mcq"><?= (int)$r['score_mcq'] ?>/<?= $MAX_SCORE ?></td>
                     <td class="c-time"><span class="pill"><?= (int)$r['time_seconds'] ?>s</span></td>
                     <td class="c-date"><span class="muted"><?= h($submittedText) ?></span></td>
                     <td class="c-status"><span class="muted"><?= h($status) ?></span></td>
@@ -161,13 +167,14 @@ $top3 = array_slice($submittedOnly, 0, 3);
     </section>
 
     <footer class="foot">
-      <span class="muted">BASC Quiz System • Leaderboard</span>
+      <span class="muted">QUIZORA • Leaderboard</span>
     </footer>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
-    const labels = [...Array(31).keys()].map(String);
+    const MAX_SCORE = <?= (int)$MAX_SCORE ?>;
+    const labels = [...Array(MAX_SCORE + 1).keys()].map(String);
 
     const chart = new Chart(document.getElementById('chartDist'), {
       type: 'line',
@@ -202,6 +209,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
     }
 
     function renderPodium(top3){
+      if (!podiumEl) return;
       if (!top3 || top3.length === 0){
         podiumEl.innerHTML = '';
         return;
@@ -209,19 +217,33 @@ $top3 = array_slice($submittedOnly, 0, 3);
       podiumEl.innerHTML = top3.slice(0,3).map((p, idx) => {
         const k = idx + 1;
         const m = k===1 ? "🥇" : (k===2 ? "🥈" : "🥉");
+        const pct = MAX_SCORE ? Math.round((Number(p.total_score)||0) / MAX_SCORE * 100) : 0;
         return `
           <article class="podium-card podium-${k}">
             <div class="medal">${m}</div>
             <div class="pname">${escapeHtml(p.name)}</div>
             <div class="pmeta">
-              <span class="pscore"><strong>${p.total_score}</strong>/30</span>
+              <span class="pscore"><strong>${Number(p.total_score)||0}</strong>/${MAX_SCORE}</span>
               <span class="dot">•</span>
-              <span class="ptime">${p.time_seconds}s</span>
+              <span class="ptime">${Number(p.time_seconds)||0}s</span>
+              <span class="dot">•</span>
+              <span class="ppct"><strong>${pct}%</strong></span>
             </div>
           </article>
         `;
       }).join('');
     }
+
+    function applySearch(){
+      const q = (searchEl?.value || '').trim().toLowerCase();
+      const trs = bodyEl.querySelectorAll('tr[data-name]');
+      trs.forEach(tr => {
+        const name = tr.getAttribute('data-name') || '';
+        tr.style.display = name.includes(q) ? '' : 'none';
+      });
+    }
+
+    searchEl?.addEventListener('input', applySearch);
 
     function renderRows(rows){
       if (!rows || rows.length === 0){
@@ -234,15 +256,16 @@ $top3 = array_slice($submittedOnly, 0, 3);
         const submitted = Number(r.submitted) === 1;
         const status = submitted ? "Submitted" : "Not yet";
         const rowClass = submitted ? (rank <= 5 ? `top5 top5-${rank}` : '') : 'not-submitted';
+        const pct = MAX_SCORE ? Math.round((Number(r.total_score)||0) / MAX_SCORE * 100) : 0;
 
         return `
-          <tr class="${rowClass}" data-name="${escapeHtml(String(r.name).toLowerCase())}">
+          <tr class="${rowClass}" data-name="${escapeHtml(String(r.name || '').toLowerCase())}">
             <td class="c-rank">${rank}</td>
-            <td class="c-name">${escapeHtml(r.name)}</td>
-            <td class="c-total"><strong>${r.total_score}</strong>/30</td>
-            <td class="c-mcq">${r.score_mcq}/20</td>
-            <td class="c-ident">${r.score_ident}/10</td>
-            <td class="c-time"><span class="pill">${r.time_seconds}s</span></td>
+            <td class="c-name">${escapeHtml(r.name || '')}</td>
+            <td class="c-total"><strong>${Number(r.total_score)||0}</strong>/${MAX_SCORE}</td>
+            <td class="c-pct"><strong>${pct}%</strong></td>
+            <td class="c-mcq">${Number(r.score_mcq)||0}/${MAX_SCORE}</td>
+            <td class="c-time"><span class="pill">${Number(r.time_seconds)||0}s</span></td>
             <td class="c-date"><span class="muted">${escapeHtml(formatDate(r.created_at || ''))}</span></td>
             <td class="c-status"><span class="muted">${status}</span></td>
           </tr>
@@ -251,17 +274,6 @@ $top3 = array_slice($submittedOnly, 0, 3);
 
       applySearch();
     }
-
-    function applySearch(){
-      const q = (searchEl.value || '').trim().toLowerCase();
-      const trs = bodyEl.querySelectorAll('tr[data-name]');
-      trs.forEach(tr => {
-        const name = tr.getAttribute('data-name') || '';
-        tr.style.display = name.includes(q) ? '' : 'none';
-      });
-    }
-
-    searchEl.addEventListener('input', applySearch);
 
     let isFetching = false;
 
@@ -274,10 +286,10 @@ $top3 = array_slice($submittedOnly, 0, 3);
         if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
 
-        renderPodium(data.top3);
-        renderRows(data.rows);
+        renderPodium(data.top3 || []);
+        renderRows(data.rows || []);
 
-        chart.data.datasets[0].data = data.dist;
+        chart.data.datasets[0].data = data.dist || [];
         chart.update();
 
         if (statusEl){
@@ -291,7 +303,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
       }
     }
 
-    setInterval(refreshLeaderboard, 5000);
+    setInterval(refreshLeaderboard, 1000);
   </script>
 </body>
 </html>

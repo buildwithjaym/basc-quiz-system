@@ -10,6 +10,7 @@ $rows = $conn->query("
     s.id,
     CONCAT(s.first_name, ' ', s.last_name) AS name,
     COALESCE(a.total_score, 0) AS total_score,
+     COALESCE(a.percent, 0) AS percent,
     COALESCE(a.score_mcq, 0) AS score_mcq,
     COALESCE(a.score_ident, 0) AS score_ident,
     COALESCE(a.time_seconds, 0) AS time_seconds,
@@ -20,6 +21,7 @@ $rows = $conn->query("
   ORDER BY 
     (a.submitted = 1) DESC,
     total_score DESC,
+    percent DESC,
     time_seconds ASC,
     a.created_at ASC,
     s.last_name ASC,
@@ -50,6 +52,7 @@ echo json_encode([
     return [
       'name' => $r['name'],
       'total_score' => (int)$r['total_score'],
+      'percent' => (int)$r['percent'],
       'score_mcq' => (int)$r['score_mcq'],
       'score_ident' => (int)$r['score_ident'],
       'time_seconds' => (int)$r['time_seconds'],
