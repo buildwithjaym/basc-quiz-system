@@ -2,7 +2,6 @@
 (() => {
     const payload = window.QUIZ_PAYLOAD || null;
 
-    // ---------- TOAST (used by quiz submit + can be reused anywhere) ----------
     function showToast({ emoji = "✨", title = "Nice!", msg = "", duration = 2200 } = {}) {
         let el = document.querySelector(".toast");
         if (!el) {
@@ -30,8 +29,94 @@
         }, duration);
     }
 
-    // ---------- INDEX PAGE: make Continue bigger, Leaderboard below ----------
-    // Works even if you remove meta + exam visual.
+    const NAV_LOCK = (() => {
+        const base = window.location.href;
+        let allow = false;
+        let allowHref = null;
+
+        function abs(href) {
+            try { return new URL(href, window.location.href).href; } catch { return null; }
+        }
+
+        function allowNext(href) {
+            allow = true;
+            allowHref = abs(href);
+        }
+
+        function denyIfNotAllowed(targetHref) {
+            const t = abs(targetHref);
+            if (!t) return false;
+            if (allow && allowHref && t === allowHref) return false;
+            if (t === base) return false;
+            return true;
+        }
+
+        function lockHistory() {
+            try {
+                history.pushState({ __lock: true }, "", window.location.href);
+                window.addEventListener("popstate", () => {
+                    try { history.pushState({ __lock: true }, "", window.location.href); } catch { }
+                });
+            } catch { }
+        }
+
+        function blockLinksAndForms() {
+            document.addEventListener("click", (e) => {
+                const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+                if (!a) return;
+                if (denyIfNotAllowed(a.href)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showToast({ emoji: "🔒", title: "Restricted", msg: "You can’t leave this page right now.", duration: 1800 });
+                }
+            }, true);
+
+            document.addEventListener("submit", (e) => {
+                const form = e.target;
+                if (!form || !(form instanceof HTMLFormElement)) return;
+                const action = form.getAttribute("action") || window.location.href;
+                if (denyIfNotAllowed(action)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showToast({ emoji: "🔒", title: "Restricted", msg: "Navigation is locked during the quiz.", duration: 1800 });
+                }
+            }, true);
+        }
+
+        function blockNavKeys() {
+            document.addEventListener("keydown", (e) => {
+                const k = e.key;
+                const target = e.target;
+                const isTyping = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+
+                if (e.altKey && (k === "ArrowLeft" || k === "ArrowRight")) {
+                    e.preventDefault();
+                    return;
+                }
+
+                if (k === "Backspace" && !isTyping) {
+                    e.preventDefault();
+                    return;
+                }
+
+                if ((e.ctrlKey || e.metaKey) && (k.toLowerCase() === "l" || k.toLowerCase() === "w" || k.toLowerCase() === "n")) {
+                    e.preventDefault();
+                    return;
+                }
+            }, true);
+        }
+
+        function start() {
+            lockHistory();
+            blockLinksAndForms();
+            blockNavKeys();
+        }
+
+        return { start, allowNext };
+    })();
+
+    NAV_LOCK.start();
+
     (function enhanceIndexButtons() {
         const formActions = document.querySelector(".form__actions");
         if (!formActions) return;
@@ -41,7 +126,6 @@
 
         if (!btnContinue || !btnLeaderboard) return;
 
-        // stack like "facebook"
         formActions.style.display = "grid";
         formActions.style.gridTemplateColumns = "1fr";
         formActions.style.gap = "10px";
@@ -58,10 +142,8 @@
         btnLeaderboard.style.borderRadius = "16px";
     })();
 
-    // ---------- if not quiz page, stop here ----------
     if (!payload) return;
 
-    // ---------- QUIZ ----------
     const root = document.getElementById("quizRoot");
     const qGrid = document.getElementById("qGrid");
     const prevBtn = document.getElementById("prevBtn");
@@ -267,7 +349,6 @@
         }
     };
 
-
     async function doSubmit(auto = false) {
         if (submitted) return;
         if (!auto && answeredCount() !== bank.length) return;
@@ -312,7 +393,6 @@
 
             localStorage.removeItem(STORAGE_KEY);
 
-            // TOAST compliment after submit (your requirement)
             showToast({
                 emoji: auto ? "⏰" : "✨",
                 title: auto ? "Time's up!" : "Submitted!",
@@ -320,8 +400,8 @@
                 duration: 2400
             });
 
-            // small delay so toast is visible
             setTimeout(() => {
+                NAV_LOCK.allowNext("result.php");
                 window.location.href = "result.php";
             }, 900);
 
@@ -338,7 +418,6 @@
         }
     }
 
-    // events
     if (prevBtn) prevBtn.addEventListener("click", () => {
         if (submitted) return;
         index = clamp(index - 1, 0, bank.length - 1);
@@ -360,7 +439,6 @@
         doSubmit(false);
     });
 
-    // init
     if (timerEl) timerEl.textContent = fmtTime(timeLeft);
     buildNav();
     render();

@@ -73,7 +73,7 @@ require __DIR__ . '/partials/header.php';
 
       <div class="result__actions">
         <a class="btn btn--primary" href="review.php">Check Answers</a>
-        <a class="btn btn--ghost" href="leaderboard.php">Leaderboard</a>
+       
       </div>
     </div>
 
