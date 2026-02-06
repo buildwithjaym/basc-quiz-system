@@ -60,12 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <form method="post" class="form" action="">
         <div class="field" style="margin-bottom:14px;">
           <label for="first_name">First Name</label>
-          <input id="first_name" name="first_name" value="<?= h($first) ?>" autocomplete="given-name" required />
+          <input id="first_name" name="first_name" placeholder="Your Name" value="<?= h($first) ?>" autocomplete="given-name" required />
         </div>
 
         <div class="field" style="margin-bottom:14px;">
           <label for="last_name">Last Name</label>
-          <input id="last_name" name="last_name" value="<?= h($last) ?>" autocomplete="family-name" required />
+          <input id="last_name" name="last_name" placeholder="Your Surname" value="<?= h($last) ?>" autocomplete="family-name" required />
         </div>
 
         <div class="form__actions" style="justify-content:stretch;">
