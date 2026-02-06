@@ -1,5 +1,4 @@
 <?php
-// index.php
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/partials/header.php';
@@ -12,7 +11,7 @@ $last  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $first = trim($_POST['first_name']);
-  $last  = trim($_POST['last_name'] );
+  $last  = trim($_POST['last_name']);
 
   if ($first === '' || $last === '') $errors[] = "Enter first and last name.";
   if (mb_strlen($first) > 50 || mb_strlen($last) > 50) $errors[] = "Name too long.";
@@ -41,44 +40,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<section class="card hero">
-  <div>
-    <h1 class="h1">Report 1 Quiz</h1>
-    <p class="lead">15 Multiple Questions about the Ethics and Morality One attempt only.</p>
+<main class="container">
+  <section class="card" style="max-width: 720px; margin: 0 auto;">
+    <div>
+      <h1 class="h1">Report 1 Quiz</h1>
+      <p class="lead">15 Multiple Questions about the Ethics and Morality. One attempt only.</p>
 
-    <?php if ($errors): ?>
-      <div class="alert">
-        <strong>Fix:</strong>
-        <ul>
-          <?php foreach ($errors as $e): ?>
-            <li><?= h($e) ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
-    <?php endif; ?>
+      <?php if ($errors): ?>
+        <div class="alert">
+          <strong>Fix:</strong>
+          <ul>
+            <?php foreach ($errors as $e): ?>
+              <li><?= h($e) ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endif; ?>
 
-    <form method="post" class="form grid2">
-      <div class="field">
-        <label>First Name</label>
-        <input name="first_name" value="<?= h($first) ?>" required />
-      </div>
+      <form method="post" class="form" action="">
+        <div class="field" style="margin-bottom:14px;">
+          <label for="first_name">First Name</label>
+          <input id="first_name" name="first_name" value="<?= h($first) ?>" autocomplete="given-name" required />
+        </div>
 
-      <div class="field">
-        <label>Last Name</label>
-        <input name="last_name" value="<?= h($last) ?>" required />
-      </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label for="last_name">Last Name</label>
+          <input id="last_name" name="last_name" value="<?= h($last) ?>" autocomplete="family-name" required />
+        </div>
 
-      <div class="form__actions">
-        <button class="btn btn--primary" type="submit">
-          Continue →
-          <span class="btn__shine"></span>
-        </button>
-        
-      </div>
-    </form>
-
-    
-  </div>
-</section>
+        <div class="form__actions" style="justify-content:stretch;">
+          <button class="btn btn--primary" type="submit" style="width:100%;">
+            Continue →
+            <span class="btn__shine"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
 
 <?php require_once __DIR__ . '/partials/footer.php'; ?>
