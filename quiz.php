@@ -13,13 +13,18 @@ $conn = db();
 $attempt_id = (int)$_SESSION['attempt_id'];
 $student_id = (int)$_SESSION['student_id'];
 
-$chk = $conn->prepare("SELECT submitted FROM attempts WHERE id=? AND student_id=? LIMIT 1");
+$chk = $conn->prepare("SELECT submitted, restricted FROM attempts WHERE id=? AND student_id=? LIMIT 1");
 $chk->bind_param("ii", $attempt_id, $student_id);
 $chk->execute();
 $row = $chk->get_result()->fetch_assoc();
 
 if (!$row) {
   header("Location: start.php");
+  exit;
+}
+
+if ((int)$row['restricted'] === 1) {
+  header("Location: restricted.php");
   exit;
 }
 
@@ -31,7 +36,7 @@ if ((int)$row['submitted'] === 1) {
 $bank = get_question_bank();
 
 $payload = [
-  "studentName" => $_SESSION['student_name'] ,
+  "studentName" => $_SESSION['student_name'],
   "maxTimeSeconds" => MAX_TIME_SECONDS,
   "mcq" => $bank["mcq"],
   "ident" => $bank["ident"]
@@ -44,7 +49,7 @@ require __DIR__ . '/partials/header.php';
   <div class="row between">
     <div>
       <h2 class="h2">Exam Session</h2>
-      <div class="muted">Student: <strong><?= h($_SESSION['student_name'] ) ?></strong></div>
+      <div class="muted">Student: <strong><?= h($_SESSION['student_name']) ?></strong></div>
     </div>
 
     <div class="timer">

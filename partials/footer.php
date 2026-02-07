@@ -7,6 +7,7 @@
   
 </footer>
 
-<script src="assets/js/quiz.js"></script>
+<script src="assets/js/quiz.js?vdev-1"></script>
+
 </body>
 </html>

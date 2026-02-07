@@ -10,16 +10,18 @@ $rows = $conn->query("
     s.id,
     CONCAT(s.first_name, ' ', s.last_name) AS name,
     COALESCE(a.total_score, 0) AS total_score,
-     COALESCE(a.percent, 0) AS percent,
+    COALESCE(a.percent, 0) AS percent,
     COALESCE(a.score_mcq, 0) AS score_mcq,
     COALESCE(a.score_ident, 0) AS score_ident,
     COALESCE(a.time_seconds, 0) AS time_seconds,
     COALESCE(a.submitted, 0) AS submitted,
+    COALESCE(a.restricted, 0) AS restricted,
     a.created_at
   FROM students s
   LEFT JOIN attempts a ON a.student_id = s.id
   ORDER BY 
     (a.submitted = 1) DESC,
+    (COALESCE(a.restricted,0) = 0) DESC,
     total_score DESC,
     percent DESC,
     time_seconds ASC,
@@ -57,6 +59,7 @@ echo json_encode([
       'score_ident' => (int)$r['score_ident'],
       'time_seconds' => (int)$r['time_seconds'],
       'submitted' => (int)$r['submitted'],
+      'restricted' => (int)$r['restricted'],
       'created_at' => $r['created_at'],
     ];
   }, $rows),

@@ -20,6 +20,7 @@ $rows = $conn->query("
     COALESCE(a.score_mcq, 0) AS score_mcq,
     COALESCE(a.time_seconds, 0) AS time_seconds,
     COALESCE(a.submitted, 0) AS submitted,
+    COALESCE(a.restricted, 0) AS restricted,
     a.created_at
   FROM students s
   LEFT JOIN attempts a ON a.student_id = s.id
@@ -61,6 +62,13 @@ $top3 = array_slice($submittedOnly, 0, 3);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QUIZORA • Leaderboard</title>
   <link rel="stylesheet" href="assets/css/leaderboard.css">
+  <link rel="icon" href="assets/img/remove_logo.png" type="image/png" />
+
+  <style>
+    .is-restricted { background: rgba(239, 68, 68, .10) !important; }
+    .status { font-weight: 900; }
+    .status--restricted { color: #ef4444; }
+  </style>
 </head>
 <body>
   <main class="wrap">
@@ -98,7 +106,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
       <?php endif; ?>
     </section>
 
-    <section class="grid">
+    <section class="gridOne">
       <div class="card">
         <div class="card-head">
           <h2 class="h2">Rankings</h2>
@@ -132,10 +140,16 @@ $top3 = array_slice($submittedOnly, 0, 3);
                 <?php foreach ($rows as $i => $r): ?>
                   <?php
                     $rank = $i + 1;
-                    $submitted = (int)($r['submitted']) === 1;
+                    $submitted = (int)$r['submitted'] === 1;
+                    $restricted = (int)$r['restricted'] === 1;
+
                     $submittedText = $r['created_at'] ? date("M d, Y h:i A", strtotime($r['created_at'])) : '';
-                    $status = $submitted ? "Submitted" : "Not yet";
-                    $rowClass = $submitted ? (($rank <= 5) ? "top5 top5-{$rank}" : "") : "not-submitted";
+                    $status = $restricted ? "Restricted" : ($submitted ? "Submitted" : "Not yet");
+
+                    $rowClass = $restricted
+                      ? "is-restricted"
+                      : ($submitted ? (($rank <= 5) ? "top5 top5-{$rank}" : "") : "not-submitted");
+
                     $pct = $MAX_SCORE > 0 ? (int)round(((int)$r['total_score'] / $MAX_SCORE) * 100) : 0;
                   ?>
                   <tr class="<?= h($rowClass) ?>" data-name="<?= h(strtolower(full_name($r))) ?>">
@@ -146,7 +160,13 @@ $top3 = array_slice($submittedOnly, 0, 3);
                     <td class="c-mcq"><?= (int)$r['score_mcq'] ?>/<?= $MAX_SCORE ?></td>
                     <td class="c-time"><span class="pill"><?= (int)$r['time_seconds'] ?>s</span></td>
                     <td class="c-date"><span class="muted"><?= h($submittedText) ?></span></td>
-                    <td class="c-status"><span class="muted"><?= h($status) ?></span></td>
+                    <td class="c-status">
+                      <?php if ($restricted): ?>
+                        <span class="status status--restricted">Restricted</span>
+                      <?php else: ?>
+                        <span class="muted"><?= h($status) ?></span>
+                      <?php endif; ?>
+                    </td>
                   </tr>
                 <?php endforeach; ?>
               <?php endif; ?>
@@ -154,7 +174,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
           </table>
         </div>
 
-        <p class="note">Search filters by name. “Not yet” means the student has no submitted attempt.</p>
+        <p class="note">Search filters by name. “Not yet” means the student has no submitted attempt. “Restricted” means blocked.</p>
       </div>
 
       <div class="card">
@@ -254,8 +274,10 @@ $top3 = array_slice($submittedOnly, 0, 3);
       bodyEl.innerHTML = rows.map((r, i) => {
         const rank = i + 1;
         const submitted = Number(r.submitted) === 1;
-        const status = submitted ? "Submitted" : "Not yet";
-        const rowClass = submitted ? (rank <= 5 ? `top5 top5-${rank}` : '') : 'not-submitted';
+        const restricted = Number(r.restricted) === 1;
+
+        const status = restricted ? "Restricted" : (submitted ? "Submitted" : "Not yet");
+        const rowClass = restricted ? "is-restricted" : (submitted ? (rank <= 5 ? `top5 top5-${rank}` : '') : 'not-submitted');
         const pct = MAX_SCORE ? Math.round((Number(r.total_score)||0) / MAX_SCORE * 100) : 0;
 
         return `
@@ -267,7 +289,9 @@ $top3 = array_slice($submittedOnly, 0, 3);
             <td class="c-mcq">${Number(r.score_mcq)||0}/${MAX_SCORE}</td>
             <td class="c-time"><span class="pill">${Number(r.time_seconds)||0}s</span></td>
             <td class="c-date"><span class="muted">${escapeHtml(formatDate(r.created_at || ''))}</span></td>
-            <td class="c-status"><span class="muted">${status}</span></td>
+            <td class="c-status">
+              ${restricted ? `<span class="status status--restricted">Restricted</span>` : `<span class="muted">${status}</span>`}
+            </td>
           </tr>
         `;
       }).join('');

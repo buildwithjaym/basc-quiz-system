@@ -1,6 +1,29 @@
-// assets/js/app.js
+// assets/js/quiz.js
 (() => {
+    const page = (location.pathname.split("/").pop() || "").toLowerCase();
+    if (page !== "quiz.php") return;
+
     const payload = window.QUIZ_PAYLOAD || null;
+    if (!payload) return;
+
+    const root = document.getElementById("quizRoot");
+    const qGrid = document.getElementById("qGrid");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const counter = document.getElementById("qCounter");
+    const timerEl = document.getElementById("timer");
+    const progressBar = document.getElementById("progressBar");
+
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMsg = document.getElementById("modalMsg");
+    const modalEmoji = document.getElementById("modalEmoji");
+    const modalBtn = document.getElementById("modalBtn");
+
+    const STORAGE_KEY = "basc_exam_answers_v1";
+
+    let submitted = false;
 
     function showToast({ emoji = "✨", title = "Nice!", msg = "", duration = 2200 } = {}) {
         let el = document.querySelector(".toast");
@@ -16,144 +39,98 @@
       `;
             document.body.appendChild(el);
         }
-
         el.querySelector(".toast__emoji").textContent = emoji;
         el.querySelector(".toast__title").textContent = title;
         el.querySelector(".toast__msg").textContent = msg;
-
         el.classList.add("is-show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => el.classList.remove("is-show"), duration);
+    }
 
-        window.clearTimeout(showToast._t);
-        showToast._t = window.setTimeout(() => {
-            el.classList.remove("is-show");
-        }, duration);
+    function openModal({ emoji = "🎉", title = "Submitted!", msg = "Nice work!" } = {}) {
+        if (!modal) return;
+        if (modalEmoji) modalEmoji.textContent = emoji;
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalMsg) modalMsg.textContent = msg;
+        modal.setAttribute("aria-hidden", "false");
+        modal.classList.add("is-open");
     }
 
     const NAV_LOCK = (() => {
-        const base = window.location.href;
-        let allow = false;
-        let allowHref = null;
+        let locked = true;
 
         function abs(href) {
-            try { return new URL(href, window.location.href).href; } catch { return null; }
+            try { return new URL(href, location.href).href; } catch { return null; }
         }
 
-        function allowNext(href) {
-            allow = true;
-            allowHref = abs(href);
-        }
-
-        function denyIfNotAllowed(targetHref) {
+        function shouldBlock(targetHref) {
+            if (!locked || submitted) return false;
             const t = abs(targetHref);
             if (!t) return false;
-            if (allow && allowHref && t === allowHref) return false;
-            if (t === base) return false;
+            const here = location.href;
+            if (t === here) return false;
             return true;
         }
 
-        function lockHistory() {
-            try {
-                history.pushState({ __lock: true }, "", window.location.href);
-                window.addEventListener("popstate", () => {
-                    try { history.pushState({ __lock: true }, "", window.location.href); } catch { }
-                });
-            } catch { }
+        function warn() {
+            showToast({ emoji: "🔒", title: "Restricted", msg: "You can’t leave this page right now.", duration: 1800 });
         }
 
-        function blockLinksAndForms() {
+        function start() {
+            locked = true;
+
+            try {
+                history.pushState({ __lock: 1 }, "", location.href);
+                addEventListener("popstate", () => {
+                    if (!locked || submitted) return;
+                    try { history.pushState({ __lock: 1 }, "", location.href); } catch { }
+                    warn();
+                });
+            } catch { }
+
             document.addEventListener("click", (e) => {
+                if (!locked || submitted) return;
+
                 const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
                 if (!a) return;
-                if (denyIfNotAllowed(a.href)) {
+
+                const href = a.getAttribute("href") || "";
+                if (!href.trim() || href === "#" || href.startsWith("javascript:")) return;
+
+                if (shouldBlock(a.href)) {
                     e.preventDefault();
                     e.stopPropagation();
-                    showToast({ emoji: "🔒", title: "Restricted", msg: "You can’t leave this page right now.", duration: 1800 });
+                    warn();
                 }
             }, true);
 
             document.addEventListener("submit", (e) => {
+                if (!locked || submitted) return;
+
                 const form = e.target;
                 if (!form || !(form instanceof HTMLFormElement)) return;
-                const action = form.getAttribute("action") || window.location.href;
-                if (denyIfNotAllowed(action)) {
+
+                const actionAttr = (form.getAttribute("action") || "").trim();
+                const action = actionAttr ? abs(actionAttr) : location.href;
+
+                if (action && shouldBlock(action)) {
                     e.preventDefault();
                     e.stopPropagation();
                     showToast({ emoji: "🔒", title: "Restricted", msg: "Navigation is locked during the quiz.", duration: 1800 });
                 }
             }, true);
+
+            addEventListener("beforeunload", (e) => {
+                if (!locked || submitted) return;
+                e.preventDefault();
+                e.returnValue = "";
+            });
         }
 
-        function blockNavKeys() {
-            document.addEventListener("keydown", (e) => {
-                const k = e.key;
-                const target = e.target;
-                const isTyping = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+        function unlock() { locked = false; }
 
-                if (e.altKey && (k === "ArrowLeft" || k === "ArrowRight")) {
-                    e.preventDefault();
-                    return;
-                }
-
-                if (k === "Backspace" && !isTyping) {
-                    e.preventDefault();
-                    return;
-                }
-
-                if ((e.ctrlKey || e.metaKey) && (k.toLowerCase() === "l" || k.toLowerCase() === "w" || k.toLowerCase() === "n")) {
-                    e.preventDefault();
-                    return;
-                }
-            }, true);
-        }
-
-        function start() {
-            lockHistory();
-            blockLinksAndForms();
-            blockNavKeys();
-        }
-
-        return { start, allowNext };
+        return { start, unlock };
     })();
-
-    NAV_LOCK.start();
-
-    (function enhanceIndexButtons() {
-        const formActions = document.querySelector(".form__actions");
-        if (!formActions) return;
-
-        const btnContinue = formActions.querySelector('button[type="submit"]');
-        const btnLeaderboard = formActions.querySelector('a[href*="leaderboard"]');
-
-        if (!btnContinue || !btnLeaderboard) return;
-
-        formActions.style.display = "grid";
-        formActions.style.gridTemplateColumns = "1fr";
-        formActions.style.gap = "10px";
-        formActions.style.justifyContent = "stretch";
-
-        btnContinue.style.width = "100%";
-        btnContinue.style.padding = "14px 16px";
-        btnContinue.style.borderRadius = "16px";
-        btnContinue.style.fontSize = "1.02rem";
-
-        btnLeaderboard.style.width = "100%";
-        btnLeaderboard.style.textAlign = "center";
-        btnLeaderboard.style.padding = "12px 16px";
-        btnLeaderboard.style.borderRadius = "16px";
-    })();
-
-    if (!payload) return;
-
-    const root = document.getElementById("quizRoot");
-    const qGrid = document.getElementById("qGrid");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const counter = document.getElementById("qCounter");
-    const timerEl = document.getElementById("timer");
-    const progressBar = document.getElementById("progressBar");
-
-    const STORAGE_KEY = "basc_exam_answers_v1";
 
     const bank = [
         ...payload.mcq.map(q => ({ ...q, type: "mcq" })),
@@ -161,15 +138,10 @@
     ];
 
     let answers = {};
-    try {
-        answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
-    } catch {
-        answers = {};
-    }
+    try { answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {}; } catch { answers = {}; }
 
     let index = 0;
     let timeLeft = Number(payload.maxTimeSeconds || 0);
-    let submitted = false;
 
     const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
     const pad2 = n => String(n).padStart(2, "0");
@@ -254,7 +226,7 @@
         <input type="radio" name="${q.key}" value="${letter}" ${picked === letter ? "checked" : ""} />
         <div>
           <div style="font-weight:900">${letter}.</div>
-          <div class="muted">${escapeHtml(String(choices[letter] ?? ""))}</div>
+          <div class="muted">${escapeHtml(String(choices[letter] || ""))}</div>
         </div>
       `;
 
@@ -285,7 +257,6 @@
         <span class="tag">#${num}</span>
       </div>
       <div class="qtitle">Type the tool/logo name</div>
-
       <div class="identWrap">
         <div class="identImg">
           <img src="${escapeAttr(q.image || "")}" alt="Identification image" />
@@ -343,10 +314,7 @@
         if (submitted) return;
         timeLeft = clamp(timeLeft - 1, 0, 999999);
         if (timerEl) timerEl.textContent = fmtTime(timeLeft);
-
-        if (timeLeft <= 0) {
-            doSubmit(true);
-        }
+        if (timeLeft <= 0) doSubmit(true);
     };
 
     async function doSubmit(auto = false) {
@@ -382,39 +350,25 @@
                 submitted = false;
                 setButtons();
                 updateProgress();
-                showToast({
-                    emoji: "⚠️",
-                    title: "Submit failed",
-                    msg: (data && data.error) ? data.error : "Server error. Try again.",
-                    duration: 2600
-                });
+                showToast({ emoji: "⚠️", title: "Submit failed", msg: (data && data.error) ? data.error : "Server error. Try again.", duration: 2600 });
                 return;
             }
 
             localStorage.removeItem(STORAGE_KEY);
+            NAV_LOCK.unlock();
 
-            showToast({
-                emoji: auto ? "⏰" : "✨",
-                title: auto ? "Time's up!" : "Submitted!",
-                msg: data.compliment || "Nice work!",
-                duration: 2400
-            });
+            showToast({ emoji: auto ? "⏰" : "✨", title: auto ? "Time's up!" : "Submitted!", msg: data.compliment || "Nice work!", duration: 2400 });
+            openModal({ emoji: "🎉", title: "Submitted!", msg: data.compliment || "Nice work!" });
 
-            setTimeout(() => {
-                NAV_LOCK.allowNext("result.php");
-                window.location.href = "result.php";
-            }, 900);
+            const go = () => { location.href = "result.php"; };
+            if (modalBtn) modalBtn.onclick = go;
+            else setTimeout(go, 900);
 
-        } catch (e) {
+        } catch {
             submitted = false;
             setButtons();
             updateProgress();
-            showToast({
-                emoji: "📶",
-                title: "Network error",
-                msg: "Please try again.",
-                duration: 2600
-            });
+            showToast({ emoji: "📶", title: "Network error", msg: "Please try again.", duration: 2600 });
         }
     }
 
@@ -444,4 +398,27 @@
     render();
     updateProgress();
     setInterval(tick, 1000);
+
+    (function tabRestrict() {
+        let tabChangeCount = 0;
+        const maxTabChanges = 3;
+
+        document.addEventListener("visibilitychange", () => {
+            if (submitted) return;
+            if (!document.hidden) return;
+
+            tabChangeCount++;
+            if (tabChangeCount >= maxTabChanges) {
+                alert("⚠ You have switched tabs too many times. Access is now restricted!");
+                fetch("restrict_attempt.php", { method: "POST" }).finally(() => {
+                    location.href = "restricted.php";
+                });
+            }
+            else {
+                showToast({ emoji: "⚠️", title: "Warning", msg: `Tab switches: ${tabChangeCount}/${maxTabChanges}`, duration: 2000 });
+            }
+        });
+    })();
+
+    NAV_LOCK.start();
 })();
