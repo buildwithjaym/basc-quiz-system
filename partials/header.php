@@ -17,6 +17,7 @@ if (!function_exists('h')) {
   <title><?= h(APP_NAME) ?></title>
 
   <link rel="stylesheet" href="assets/css/app.css" />
+  <link rel="icon" href="assets/img/remove_logo.png" type="image/png" />
 </head>
 <body>
 
