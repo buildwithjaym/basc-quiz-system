@@ -86,7 +86,7 @@ Recommended rule:
 ## Screenshots
 
 ### Home / Start
-![Home](assets/screenshots/home.png)
+![Home](assets/screenshots/inde.png)
 
 ### Quiz (Timer + Quiz Session)
 ![Quiz](assets/screenshots/image.png)
@@ -94,14 +94,11 @@ Recommended rule:
 ### Leaderboard
 ![Leaderboard](assets/screenshots/leaderboards.png)
 
-### Rankings
-![Ranking](assets/screenshots/Rankinggg.png)
+### Restricted Leaderboard
+![Restrict_Leaderboard_UI](assets/screenshots/Restricted_UI.png)
 
 ### Restricted UI
 ![Restrict](assets/screenshots/Restricted.png)
-
-### Restricted Leaderboard
-![Restrict_Leaderboard_UI](assets/screenshots/Restricted_UI.png)
 
 ### Result
 ![Result](assets/screenshots/Updated_result.png)
