@@ -109,10 +109,10 @@ Recommended rule:
 
 ## Getting Started Create folder to the htdocs
 
-C:\xampp\htdocs\basc-quiz
+C:\xampp\htdocs\basc_exam
 
 ## How to run it
-Go to the http://localhost/basc-quiz/
+Go to the http://localhost/basc_exam/
 
 ### 1 Clone / Download
 
