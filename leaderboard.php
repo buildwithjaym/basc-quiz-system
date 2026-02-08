@@ -54,6 +54,11 @@ $submittedOnly = array_values(array_filter($rows, function($r){
 }));
 
 $top3 = array_slice($submittedOnly, 0, 3);
+
+$initialRestrictedNames = [];
+foreach ($rows as $r) {
+  if ((int)$r['restricted'] === 1) $initialRestrictedNames[] = strtolower(full_name($r));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,11 +68,10 @@ $top3 = array_slice($submittedOnly, 0, 3);
   <title>QUIZORA • Leaderboard</title>
   <link rel="stylesheet" href="assets/css/leaderboard.css">
   <link rel="icon" href="assets/img/remove_logo.png" type="image/png" />
-
   <style>
-    .is-restricted { background: rgba(239, 68, 68, .10) !important; }
-    .status { font-weight: 900; }
-    .status--restricted { color: #ef4444; }
+    .is-restricted{ background: rgba(239, 68, 68, .10) !important; }
+    .status{ font-weight: 900; }
+    .status--restricted{ color: #ef4444; }
   </style>
 </head>
 <body>
@@ -75,7 +79,7 @@ $top3 = array_slice($submittedOnly, 0, 3);
     <header class="head">
       <div>
         <h1 class="title">Leaderboard</h1>
-        <p class="sub" id="lbStatus">Live updates enabled</p>
+        <p class="sub" id="lbStatus">Live updates enabled • Click anywhere once to enable notifications</p>
       </div>
 
       <div class="actions">
@@ -301,6 +305,47 @@ $top3 = array_slice($submittedOnly, 0, 3);
 
     let isFetching = false;
 
+    let lastRestricted = new Set(<?= json_encode($initialRestrictedNames) ?>);
+
+    function pushNotify(title, body){
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+      try { new Notification(title, { body }); } catch(e) {}
+    }
+
+    function ensureNotifPermission(){
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "granted") return;
+
+      if (Notification.permission === "default") {
+        document.addEventListener("click", () => {
+          Notification.requestPermission().catch(()=>{});
+        }, { once: true });
+      }
+    }
+
+    ensureNotifPermission();
+
+    function checkRestrictedPush(rows){
+      const nowRestricted = new Set(
+        rows
+          .filter(r => Number(r.restricted) === 1)
+          .map(r => String((r.name || "").trim().toLowerCase()))
+          .filter(Boolean)
+      );
+
+      if (lastRestricted && lastRestricted.size) {
+        nowRestricted.forEach(nameKey => {
+          if (!lastRestricted.has(nameKey)) {
+            const pretty = nameKey.replace(/\b\w/g, c => c.toUpperCase());
+            pushNotify("🔒 User Restricted", pretty + " was restricted.");
+          }
+        });
+      }
+
+      lastRestricted = nowRestricted;
+    }
+
     async function refreshLeaderboard(){
       if (isFetching) return;
       isFetching = true;
@@ -312,13 +357,14 @@ $top3 = array_slice($submittedOnly, 0, 3);
 
         renderPodium(data.top3 || []);
         renderRows(data.rows || []);
+        checkRestrictedPush(data.rows || []);
 
         chart.data.datasets[0].data = data.dist || [];
         chart.update();
 
         if (statusEl){
           const t = new Date((data.server_time || Date.now()/1000) * 1000);
-          statusEl.textContent = "Live updates • Last check: " + t.toLocaleTimeString();
+          statusEl.textContent = "Live updates • Last check: " + t.toLocaleTimeString() + " • Click anywhere once to enable notifications";
         }
       }catch(e){
         if (statusEl) statusEl.textContent = "Live updates • Connection issue";
